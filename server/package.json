@@ -1,0 +1,16 @@
+{
+  "name": "smart-dustbin-monitor",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Premium Smart Dustbin monitoring dashboard with Adafruit IO and Web3Forms.",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^5.1.0"
+  }
+}

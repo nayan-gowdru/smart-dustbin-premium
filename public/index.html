@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#08111e" />
+  <title>Smart Dustbin • Command Center</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="ambient ambient-a"></div>
+  <div class="ambient ambient-b"></div>
+  <div class="grid-overlay"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark"><span></span><span></span><span></span></div>
+      <div>
+        <div class="brand-title">SMART DUSTBIN</div>
+        <div class="brand-subtitle">COMMAND CENTER</div>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <a class="nav-link active" href="#overview"><span class="icon">⌂</span><span>Overview</span></a>
+      <a class="nav-link" href="#sensors"><span class="icon">◉</span><span>Sensors</span></a>
+      <a class="nav-link" href="#history"><span class="icon">⌁</span><span>Analytics</span></a>
+      <a class="nav-link" href="#alerts"><span class="icon">!</span><span>Alerts</span></a>
+      <a class="nav-link" href="#system"><span class="icon">⚙</span><span>System</span></a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <div class="mini-status">
+        <span class="status-dot" id="sidebarDot"></span>
+        <div>
+          <strong id="sidebarStatus">Connecting</strong>
+          <small>Telemetry link</small>
+        </div>
+      </div>
+      <div class="sidebar-foot">IoT • ESP8266 • Adafruit IO</div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <button class="mobile-menu" id="menuButton" aria-label="Toggle menu">☰</button>
+      <div>
+        <p class="eyebrow">INTELLIGENT WASTE MONITORING</p>
+        <h1>Smart Dustbin <span>/ Live Dashboard</span></h1>
+      </div>
+      <div class="top-actions">
+        <div class="live-pill"><span></span> LIVE <b id="lastUpdated">--:--:--</b></div>
+        <button class="ghost-button" id="refreshButton">↻ Refresh</button>
+      </div>
+    </header>
+
+    <section class="hero" id="overview">
+      <div class="hero-copy">
+        <div class="hero-badge">AUTONOMOUS • CONNECTED • CLEANER</div>
+        <h2>Real-time intelligence for a <em>smarter</em> bin.</h2>
+        <p>Track fill level, detect a user, automate the lid and trigger email alerts from one control surface.</p>
+      </div>
+
+      <div class="hero-device card-glass">
+        <div class="device-topline"><span>DEVICE STATUS</span><strong id="deviceStatusText">ONLINE</strong></div>
+        <div class="device-scene">
+          <div class="signal signal-1"></div>
+          <div class="signal signal-2"></div>
+          <div class="signal signal-3"></div>
+          <div class="bin-shell">
+            <div class="bin-lid" id="binLid"></div>
+            <div class="bin-body">
+              <div class="bin-fill" id="binFill"></div>
+              <div class="bin-rim"></div>
+              <div class="bin-label">SD</div>
+              <div class="bin-led"></div>
+            </div>
+          </div>
+          <div class="device-floor"></div>
+        </div>
+        <div class="device-meta">
+          <div><small>Controller</small><strong>ESP-12E / ESP8266</strong></div>
+          <div><small>Cloud</small><strong>Adafruit IO</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="metric-grid" aria-label="Key metrics">
+      <article class="metric-card card-glass featured">
+        <div class="metric-heading"><span>GARBAGE LEVEL</span><i>01</i></div>
+        <div class="metric-main"><strong id="garbageLevel">--%</strong><span id="garbageTrend">waiting for telemetry</span></div>
+        <div class="progress"><div class="progress-bar" id="levelBar"></div></div>
+        <div class="metric-footer"><span>Feed: garbage-level</span><strong id="levelLabel">--</strong></div>
+      </article>
+
+      <article class="metric-card card-glass">
+        <div class="metric-heading"><span>BIN STATUS</span><i>02</i></div>
+        <div class="status-large"><span class="status-ring" id="binStatusRing"></span><strong id="binStatus">--</strong></div>
+        <p class="metric-note">Automatic threshold assessment</p>
+      </article>
+
+      <article class="metric-card card-glass">
+        <div class="metric-heading"><span>LID POSITION</span><i>03</i></div>
+        <div class="value-row"><strong id="lidStatus">--</strong><span class="micro-chip" id="lidChip">SYNC</span></div>
+        <p class="metric-note">SG90 actuator • D7 / GPIO13</p>
+      </article>
+
+      <article class="metric-card card-glass">
+        <div class="metric-heading"><span>CONTROLLER</span><i>04</i></div>
+        <div class="value-row"><strong id="controllerStatus">--</strong><span class="micro-chip" id="mqttChip">MQTT</span></div>
+        <p class="metric-note">Adafruit IO telemetry bridge</p>
+      </article>
+    </section>
+
+    <section class="content-grid" id="sensors">
+      <article class="panel card-glass wide-panel">
+        <div class="panel-head">
+          <div><p class="eyebrow">TELEMETRY</p><h3>Sensor intelligence</h3></div>
+          <div class="panel-tag">AUTO REFRESH 5S</div>
+        </div>
+        <div class="sensor-grid">
+          <div class="sensor-card">
+            <div class="sensor-icon">⌁</div>
+            <div><span>Hand distance</span><strong id="handDistance">--</strong><small>cm • HC-SR04 #1</small></div>
+          </div>
+          <div class="sensor-card">
+            <div class="sensor-icon">▥</div>
+            <div><span>Garbage distance</span><strong id="garbageDistance">--</strong><small>cm • HC-SR04 #2</small></div>
+          </div>
+          <div class="sensor-card">
+            <div class="sensor-icon">⚡</div>
+            <div><span>System link</span><strong id="systemLink">--</strong><small>ESP8266 heartbeat</small></div>
+          </div>
+        </div>
+
+        <div class="telemetry-strip">
+          <div><span>HAND TRIGGER</span><strong>≤ 20 cm</strong></div>
+          <div><span>FULL THRESHOLD</span><strong>≤ 10 cm</strong></div>
+          <div><span>BIN HEIGHT</span><strong>30 cm</strong></div>
+        </div>
+      </article>
+
+      <article class="panel card-glass quick-panel" id="alerts">
+        <div class="panel-head"><div><p class="eyebrow">ACTIONS</p><h3>Operator console</h3></div></div>
+        <button class="primary-button" id="testAlertButton"><span>↗</span> Send test alert</button>
+        <button class="secondary-button" id="diagnosticButton"><span>◌</span> Run visual diagnostic</button>
+        <div class="alert-box" id="alertBox"><div class="alert-mark">✓</div><div><strong>Ready</strong><p>System waiting for live telemetry.</p></div></div>
+      </article>
+    </section>
+
+    <section class="content-grid analytics" id="history">
+      <article class="panel card-glass chart-panel">
+        <div class="panel-head">
+          <div><p class="eyebrow">ANALYTICS</p><h3>Garbage level history</h3></div>
+          <div class="legend"><span></span> Fill %</div>
+        </div>
+        <div class="chart-wrap"><canvas id="levelChart"></canvas></div>
+      </article>
+
+      <article class="panel card-glass activity-panel">
+        <div class="panel-head"><div><p class="eyebrow">EVENT STREAM</p><h3>Recent activity</h3></div></div>
+        <div class="activity-list" id="activityList">
+          <div class="activity-item muted"><span class="timeline-dot"></span><div><strong>Awaiting first sample</strong><small>Dashboard has just started</small></div><time>now</time></div>
+        </div>
+      </article>
+    </section>
+
+    <section class="system-section" id="system">
+      <article class="panel card-glass system-panel">
+        <div><p class="eyebrow">SYSTEM FABRIC</p><h3>Project architecture</h3></div>
+        <div class="architecture">
+          <div class="arch-node active"><span>01</span><strong>ESP8266</strong><small>Sensor + Servo</small></div>
+          <div class="arch-line"></div>
+          <div class="arch-node active"><span>02</span><strong>Adafruit IO</strong><small>MQTT telemetry</small></div>
+          <div class="arch-line"></div>
+          <div class="arch-node"><span>03</span><strong>Node / Express</strong><small>Secure API proxy</small></div>
+          <div class="arch-line"></div>
+          <div class="arch-node"><span>04</span><strong>Web3Forms</strong><small>Alert delivery</small></div>
+        </div>
+        <div class="footer-note">Premium front-end • responsive layout • live charts • animated device state • server-side secrets</div>
+      </article>
+    </section>
+
+    <footer>SMART DUSTBIN COMMAND CENTER <span>•</span> Intelligent Waste Monitoring System</footer>
+  </main>
+
+  <div class="toast" id="toast"><div class="toast-icon">✓</div><div><strong id="toastTitle">Success</strong><p id="toastMessage">Done.</p></div></div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
